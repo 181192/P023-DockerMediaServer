@@ -1,0 +1,149 @@
+version: '3'
+services:
+  delugevpn:
+    container_name: delugevpn
+    image: binhex/arch-delugevpn
+    cap_add: 
+      - NET_ADMIN
+    ports: 
+      - '8112:8112'
+      - '8118:8118'
+      - '58846:58846'
+      - '58946:58946'
+    volumes:
+      - /opt/appdata/delugevpn:/data
+      - /opt/appdata/delugevpn:/config
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - delugevpn.env
+      - default.env
+    networks:
+      - proxy
+
+  nginx:
+    container_name: nginx
+    image: linuxserver/letsencrypt
+    cap_add: 
+      - NET_ADMIN
+    ports:
+      - '443:443'
+      - '80:80'
+    volumes:
+     - /opt/appdata/letsencrypt:/config
+     - /opt/appdata/organizr:/database
+    restart: always
+    depends_on:
+      - sonarr
+      - radarr
+      - plex
+      - ombi
+      - portainer
+    env_file:
+      - nginx.env
+      - default.env
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
+
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker
+    volumes:
+      - /opt/appdata/plex:/config
+      - /mnt/storage:/data
+    environment:
+      - PLEX_CLAIM="claim"
+    env_file:
+      - default.env
+    restart: always
+    ports:
+      - '32400:32400'
+      - '32400:32400/udp'
+      - '32469:32469'
+      - '32469:32469/udp'
+      - '1900:1900/udp'
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
+
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr
+    volumes:
+      - /opt/appdata/sonarr:/config
+      - /mnt/storage/tv:/tv
+      - /opt/downloads/complete/tv:/downloads/complete/tv
+    env_file:
+      - default.env
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
+
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr
+    depends_on:
+      - plex
+    volumes:
+      - /opt/appdata/radarr:/config
+      - /mnt/storage/movies:/movies
+      - /opt/appdata/complete/movies:/downloads
+    env_file:
+      - default.env
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
+
+  ombi:
+    container_name: ombi
+    image: linuxserver/ombi
+    ports:
+      - '3579:3579'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/appdata/ombi:/config
+    env_file:
+      - default.env
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer
+    ports:
+      - '9000:9000'
+    volumes:
+      - /opt/appdata/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart:
+      always
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
+  
+networks:
+  proxy:
+    external:
+      name: proxy
