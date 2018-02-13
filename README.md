@@ -7,32 +7,41 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
 2. Setup env variables in the .env files.
 3. Copy the `default`file to `/opt/appdata/letsencrypt/nginx/site-confs/`.
 4. Clone the organizr files to the www folder in nginx.
+
    `cd /opt/appdata/letsencrypt/www/`
+   
    `git clone https://github.com/causefx`
+   
    You will now have a folder named `Organizr` inside the `www` folder.
 4. Run with `docker-compose up -d` the `-d` is optional for running inn the background.
 5. To create a password on the nginx server to have protection if you serve the server on the wide-web run this command.
+
    `docker exec -it letsencrypt htpasswd -c /config/nginx/.htpasswd <username>`. 
+   
    This will create a file with your login credentials and hash the password.
 
 ## .env files guide
-default.env
-To find your PUID and PGID run `id -u` and `id -g`. And set your `TZ` to the right timezone.
+### default.env
+To find your PUID and PGID run `id -u` and `id -g`. 
+
+And set your `TZ` to the right timezone.
 ```
 TZ=Europe/Oslo
 PUID=1000
 PGID=1000
 ```
 
-nginx.env
+### nginx.env
 ```
 EMAIL=mail@mail.com # email for your SSL certificate
 URL=some-domain.ddns.net # your domain
 VALIDATION=http # http validation for letsencrypt, need to open port 80 on your router and port-forward to local server ip
 ```
 
-delugevpn.env
-If you don't want to use VPN set `VPN_ENABLED=no`. And if you want to disable Privoxy set `ENABLE_PRIVOXY=no`
+### delugevpn.env
+If you don't want to use VPN set `VPN_ENABLED=no`. 
+
+And if you want to disable Privoxy set `ENABLE_PRIVOXY=no`
 ```
 VPN_ENABLED=yes
 VPN_USER=your-vpn@mail.com
