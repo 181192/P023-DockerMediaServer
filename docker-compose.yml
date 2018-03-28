@@ -10,8 +10,10 @@ services:
       - '8118:8118'
       - '58846:58846'
       - '58946:58946'
+    depends_on:
+      - nginx
     volumes:
-      - /opt/appdata/delugevpn:/data
+      - /media/hdd1/nedlastning:/downloads
       - /opt/appdata/delugevpn:/config
       - /etc/localtime:/etc/localtime:ro
     env_file:
@@ -29,15 +31,10 @@ services:
       - '443:443'
       - '80:80'
     volumes:
+     - /etc/localtime:/etc/localtime:ro
      - /opt/appdata/letsencrypt:/config
      - /opt/appdata/organizr:/database
     restart: always
-    depends_on:
-      - sonarr
-      - radarr
-      - plex
-      - ombi
-      - portainer
     env_file:
       - nginx.env
       - default.env
@@ -52,19 +49,27 @@ services:
     container_name: plex
     image: plexinc/pms-docker
     volumes:
-      - /opt/appdata/plex:/config
-      - /mnt/storage:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/appdata/plex/config:/config
+      - /opt/appdata/plex/transcode:/transcode
+      - /media:/data
     environment:
-      - PLEX_CLAIM="claim"
+      - PLEX_CLAIM=claim-Xthgx81ZnQkN6fyb5wyM
+      - ADVERTISE_IP=http://192.168.8.210:32400
     env_file:
       - default.env
     restart: always
+    hostname: master
     ports:
-      - '32400:32400'
-      - '32400:32400/udp'
-      - '32469:32469'
-      - '32469:32469/udp'
+      - '32400:32400/tcp'
+      - '3005:3005/tcp'
+      - '8324:8324/tcp'
+      - '32469:32469/tcp'
       - '1900:1900/udp'
+      - '32410:32410/udp'
+      - '32412:32412/udp'
+      - '32413:32413/udp'
+      - '32414:32414/udp'
     deploy:
       replicas: 1
       restart_policy:
@@ -75,10 +80,13 @@ services:
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr
+    depends_on:
+      - delugevpn
     volumes:
       - /opt/appdata/sonarr:/config
-      - /mnt/storage/tv:/tv
-      - /opt/downloads/complete/tv:/downloads/complete/tv
+      - /media/hdd2/serier:/tv
+      - /media/hdd1/nedlastning:/downloads
+      - /etc/localtime:/etc/localtime:ro
     env_file:
       - default.env
     restart: unless-stopped
@@ -93,11 +101,12 @@ services:
     container_name: radarr
     image: linuxserver/radarr
     depends_on:
-      - plex
+      - delugevpn
     volumes:
       - /opt/appdata/radarr:/config
-      - /mnt/storage/movies:/movies
-      - /opt/appdata/complete/movies:/downloads
+      - /media/hdd1/film:/movies
+      - /media/hdd1/nedlastning:/downloads
+      - /etc/localtime:/etc/localtime:ro
     env_file:
       - default.env
     restart: unless-stopped
@@ -116,6 +125,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /opt/appdata/ombi:/config
+    environment:
+      - HOME=/config
     env_file:
       - default.env
     restart: unless-stopped
@@ -131,7 +142,10 @@ services:
     image: portainer/portainer
     ports:
       - '9000:9000'
+    environment:
+      - HTTPS_PROXY=your_proxy_domain
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - /opt/appdata/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart:
