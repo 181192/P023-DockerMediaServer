@@ -3,14 +3,15 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
 
 
 ## Intructions
-1. Clone the repository `git clone https://github.com/181192/P023-DockerMediaServer`.
-2. Setup env variables in the .env files.
-3. Run `docker-compose up` to set up the folder structure and downloading the images. You may get some errors, but when 
+1. Install [docker-ce](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/).
+2. Clone the repository `git clone https://github.com/181192/P023-DockerMediaServer`.
+3. Setup env variables in the .env files.
+4. Run `docker network create proxy` to create a bridge network for the containers 
+5. Run `docker-compose up` to set up the folder structure and downloading the images. You may get some errors, but when 
    everything is starting run `docker-compose down`. You shall now have all the data for the containers in `/opt/appdata/`.
 
 ```
    /opt/appdata/
-   ├── complete
    ├── delugevpn
    ├── letsencrypt
    ├── ombi
@@ -21,18 +22,18 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
    └── sonarr 
 ```
 
-4. Copy the `default`file to `/opt/appdata/letsencrypt/nginx/site-confs/`.
-5. Clone the organizr files to the www folder in nginx.
+6. Copy the `default`file to `/opt/appdata/letsencrypt/nginx/site-confs/`.
+7. Clone the organizr files to the www folder in nginx.
 
    `cd /opt/appdata/letsencrypt/www/`
    
    `git clone https://github.com/causefx/Organizr`
    
    You will now have a folder named `Organizr` inside the `www` folder.
-6. Change line 8 in `/opt/appdata/delugevpn/core.conf` to this `"move_completed_path": "/downloads/completed",`.
-7. Change line 21 in `/opt/appdata/delugevpn/core.conf` to this `"download_location": "/downloads/incomplete",`.
-8. Run with `docker-compose up -d` the `-d` is optional for running inn the background.
-9. To create a password on the nginx server to have protection if you serve the server on the wide-web run this command.
+8. Change line 8 in `/opt/appdata/delugevpn/core.conf` to this `"move_completed_path": "/downloads/completed",`.
+9. Change line 21 in `/opt/appdata/delugevpn/core.conf` to this `"download_location": "/downloads/incomplete",`.
+10. Run with `docker-compose up -d` the `-d` is optional for running inn the background.
+11. To create a password on the nginx server to have protection if you serve the server on the wide-web run this command.
 
    `docker exec -it nginx htpasswd -c /config/nginx/.htpasswd <username>`. 
    
@@ -40,7 +41,7 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
 
 ## .env files guide
 ### default.env
-To find your PUID and PGID run `id -u` and `id -g`. 
+To find your PUID and PGID run `id -u` and `id -g` in a terminal. 
 
 And set your `TZ` to the right timezone.
 ```
