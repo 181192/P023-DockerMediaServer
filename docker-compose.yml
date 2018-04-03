@@ -19,6 +19,10 @@ services:
     env_file:
       - delugevpn.env
       - default.env
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
     networks:
       - proxy
 
