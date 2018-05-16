@@ -4,6 +4,34 @@ server {
 	return 301 https://$host$request_uri;
 }
 
+upstream sonarr {
+    server localhost:8989;
+}
+
+upstream radarr {
+    server localhost:7878;
+}
+
+upstream ombi {
+    server localhost:3579;
+}
+
+upstream deluge {
+    server localhost:8112;
+}
+
+upstream plex {
+    server localhost:32400;
+}
+
+upstream portainer {
+    server localhost:9000;
+}
+
+upstream glances {
+    server localhost:61208;
+}
+
 # main server block
 server {
 	listen 443 ssl http2 default_server;
@@ -50,7 +78,7 @@ server {
 
 	# Sonarr
 	location /sonarr {
-		proxy_pass http://sonarr:8989;
+		proxy_pass http://sonarr/;
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header Host $host;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -61,7 +89,7 @@ server {
 
 	# Radarr
 	location /radarr {
-		proxy_pass http://radarr:7878;
+		proxy_pass http://radarr/;
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header Host $host;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -77,7 +105,7 @@ server {
 	}
 
 	location /ombi/ {
-		proxy_pass http://ombi:3579;
+		proxy_pass http://ombi/;
 		proxy_set_header Host $host;
 		proxy_set_header X-Forwarded-Host $server_name;
 		proxy_set_header X-Real-IP $remote_addr;
@@ -85,12 +113,12 @@ server {
 		proxy_set_header X-Forwarded-Ssl on;
 		proxy_set_header X-Forwarded-Proto $scheme;
 		proxy_read_timeout  90;
-		proxy_redirect http://ombi:3579 https://$host;
+		proxy_redirect http://ombi/ https://$host;
 }
 
 	# Deluge
 	location /deluge {
-		proxy_pass http://delugevpn:8112/;
+		proxy_pass http://deluge/;
 		proxy_set_header X-Deluge-Base "/deluge/";
 		add_header X-Frame-Options SAMEORIGIN;
 	}
@@ -98,24 +126,36 @@ server {
 	# Plex
 	location /web/ {
 		proxy_buffering off;
-		proxy_pass http://plex:32400/web/;
+		proxy_pass http://plex/web/;
 	}
 
 	location /plex {
-		proxy_pass http://plex:32400/web/;
+		proxy_pass http://plex/web/;
 	}
 
 	# Portainer
 	location /portainer/ {
 		proxy_http_version 1.1;
 		proxy_set_header Connection "";
-		proxy_pass http://portainer:9000/;	
+		proxy_pass http://portainer/;
 	}
 
 	location /portainer/api/ {
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection "upgrade";
 		proxy_http_version 1.1;
-		proxy_pass http://portainer:9000/api/;
+		proxy_pass http://portainer/api/;
+	}
+
+	# Glances
+	port_in_redirect off;
+    
+	location /glances/ {
+		rewrite /glances/(.*) /$1 break;
+		proxy_pass http://glances/;
+		proxy_set_header Host $http_host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
 	}
 }
