@@ -120,6 +120,23 @@ services:
         condition: on-failure
     networks:
       - proxy
+      
+  jackett:
+    container_name: jackett
+    image: linuxserver/jackett
+    network_mode: host
+    env_file:
+      - default.env
+    volumes:
+      - /opt/appdata/jackett:/config
+      - /media/hdd1/nedlastning:/downloads
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
 
   ombi:
     container_name: ombi
