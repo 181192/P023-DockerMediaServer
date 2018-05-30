@@ -13,6 +13,7 @@ server {
 	server_name _;
 	server_tokens off;
 
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
 	ssl_certificate /config/keys/letsencrypt/fullchain.pem;
 	ssl_certificate_key /config/keys/letsencrypt/privkey.pem;
 	ssl_dhparam /config/nginx/dhparams.pem;
@@ -24,13 +25,27 @@ server {
 	auth_basic "Restricted";
 	auth_basic_user_file /config/nginx/.htpasswd;
 
+    # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
+    add_header Strict-Transport-Security "max-age=15768000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Xss-Protection "1";
+    add_header X-Whome "l-cbz02";
+    # OCSP Stapling 
+    # fetch OCSP records from URL in ssl_certificate and cache them
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    resolver 8.8.8.8;
+    ## Improves TTFB by using a smaller SSL buffer than the nginx default
+    ssl_buffer_size 8k;
+
 	# Organizr files goes here
 	root /config/www/Organizr;
 
 	index index.php index.html index.htm
 
 	error_page 401 403 404 /404.html;
-	# error_page 400 401 403 405 408 500 502 503 504  /error.php?error=$status;;
+	# error_page 400 401 403 405 408 500 502 503 504  /error.php?error=$status;
 
 	location / {
 		try_files $uri $uri/ =404;
