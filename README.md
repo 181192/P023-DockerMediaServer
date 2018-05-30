@@ -1,5 +1,5 @@
 # P023-DockerMediaServer
-Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr, Ombi and Portainer
+Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr, Jackett, Ombi, Glances and Portainer.
 
 
 ## Intructions
@@ -13,6 +13,7 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
 ```
    /opt/appdata/
    ├── delugevpn
+   ├── jackett
    ├── letsencrypt
    ├── ombi
    ├── organizr
