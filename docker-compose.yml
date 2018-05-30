@@ -160,6 +160,25 @@ services:
         condition: on-failure
     networks:
       - proxy
+      
+  glances:
+    image: docker.io/nicolargo/glances
+    container_name: glances
+    ports:
+      - "61208-61209:61208-61209"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - GLANCES_OPT=-w
+    pid: "host"
+    restart:
+      always
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - proxy
   
 networks:
   proxy:
