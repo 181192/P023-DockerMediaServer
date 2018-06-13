@@ -6,8 +6,7 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
 1. Install [docker-ce](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 2. Clone the repository `git clone https://github.com/181192/P023-DockerMediaServer`.
 3. Setup env variables in the .env files.
-4. Run `docker network create proxy` to create a bridge network for the containers 
-5. Run `docker-compose up` to set up the folder structure and downloading the images. You may get some errors, but when 
+4. Run `docker-compose up` to set up the folder structure and downloading the images. You may get some errors, but when 
    everything is starting run `docker-compose down`. You shall now have all the data for the containers in `/opt/appdata/`.
 
 ```
@@ -23,25 +22,27 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
    └── sonarr 
 ```
 
-6. Copy the `default`file to `/opt/appdata/letsencrypt/nginx/site-confs/`.
-7. Clone the organizr files to the www folder in nginx.
+5. Copy the `default`file to `/opt/appdata/letsencrypt/nginx/site-confs/`.
+6. Clone the organizr files to the www folder in nginx.
 
    `cd /opt/appdata/letsencrypt/www/`
    
    `git clone https://github.com/causefx/Organizr`
    
    You will now have a folder named `Organizr` inside the `www` folder.
-8. Change line 8 in `/opt/appdata/delugevpn/core.conf` to this `"move_completed_path": "/downloads/completed",`.
-9. Change line 21 in `/opt/appdata/delugevpn/core.conf` to this `"download_location": "/downloads/incomplete",`.
-10. Run with `docker-compose up -d` the `-d` is optional for running inn the background.
-11. To create a password on the nginx server to have protection if you serve the server on the wide-web run this command.
+7. Change line 8 in `/opt/appdata/delugevpn/core.conf` to this `"move_completed_path": "/downloads/completed",`.
+8. Change line 21 in `/opt/appdata/delugevpn/core.conf` to this `"download_location": "/downloads/incomplete",`.
+9. Run with `docker-compose up -d` the `-d` is optional for running inn the background.
+10. To create a password on the nginx server to have protection if you serve the server on the wide-web run this command.
 
    `docker exec -it nginx htpasswd -c /config/nginx/.htpasswd <username>`. 
    
    This will create a file with your login credentials and hash the password.
+11. You are now done with the most part. The rest is personal preferences and setup. If you have any issues with reverse proxy, you may have to add base path in some applications.
 
 ## .env files guide
-### default.env
+Open the .env file.
+
 To find your PUID and PGID run `id -u` and `id -g` in a terminal. 
 
 And set your `TZ` to the right timezone.
@@ -51,7 +52,7 @@ PUID=1000
 PGID=1000
 ```
 
-### nginx.env
+Set your email and domain name for the SSL sertificate from Let's Encrypt
 ```
 EMAIL=mail@mail.com # email for your SSL certificate
 URL=some-domain.ddns.net # your domain
@@ -62,6 +63,8 @@ VALIDATION=http # http validation for letsencrypt, need to open port 80 on your 
 If you don't want to use VPN set `VPN_ENABLED=no`. 
 
 And if you want to disable Privoxy set `ENABLE_PRIVOXY=no`
+
+Remeber to copy the OpenVPN certificate from your VPN provider into `/opt/appdata/delugevpn/openvpn/`.
 ```
 VPN_ENABLED=yes
 VPN_USER=your-vpn@mail.com
