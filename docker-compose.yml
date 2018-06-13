@@ -13,12 +13,15 @@ services:
     depends_on:
       - nginx
     volumes:
-      - /media/hdd1/nedlastning:/downloads
-      - /opt/appdata/delugevpn:/config
+      - ${DOWNLOAD_PATH}:/downloads
+      - ${CONFIG_PATH}/delugevpn:/config
       - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     env_file:
       - delugevpn.env
-      - default.env
     deploy:
       replicas: 1
       restart_policy:
@@ -36,12 +39,16 @@ services:
       - '80:80'
     volumes:
      - /etc/localtime:/etc/localtime:ro
-     - /opt/appdata/letsencrypt:/config
-     - /opt/appdata/organizr:/database
+     - ${CONFIG_PATH}/letsencrypt:/config
+     - ${CONFIG_PATH}/organizr:/database
     restart: always
-    env_file:
-      - nginx.env
-      - default.env
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - EMAIL=${NGINX_EMAIL}
+      - URL=${NGINX_URL}
+      - VALIDATION=${NGINX_VALIDATION}
     deploy:
       replicas: 1
       restart_policy:
@@ -54,14 +61,15 @@ services:
     image: plexinc/pms-docker
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /opt/appdata/plex/config:/config
-      - /opt/appdata/plex/transcode:/transcode
-      - /media:/data
+      - ${CONFIG_PATH}/plex/config:/config
+      - ${CONFIG_PATH}/plex/transcode:/transcode
+      - ${DATA_PATH}:/data
     environment:
-      - PLEX_CLAIM=claim-Xthgx81ZnQkN6fyb5wyM
-      - ADVERTISE_IP=http://192.168.8.210:32400
-    env_file:
-      - default.env
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     restart: always
     hostname: master
     ports:
@@ -87,12 +95,14 @@ services:
     depends_on:
       - delugevpn
     volumes:
-      - /opt/appdata/sonarr:/config
-      - /media/hdd2/serier:/tv
-      - /media/hdd1/nedlastning:/downloads
+      - ${CONFIG_PATH}/sonarr:/config
+      - ${TV_PATH}:/tv
+      - ${DOWNLOAD_PATH}:/downloads
       - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - default.env
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     restart: unless-stopped
     deploy:
       replicas: 1
@@ -107,12 +117,14 @@ services:
     depends_on:
       - delugevpn
     volumes:
-      - /opt/appdata/radarr:/config
-      - /media/hdd1/film:/movies
-      - /media/hdd1/nedlastning:/downloads
+      - ${CONFIG_PATH}/radarr:/config
+      - ${MOVIES_PATH}:/movies
+      - ${DOWNLOAD_PATH}:/downloads
       - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - default.env
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     restart: unless-stopped
     deploy:
       replicas: 1
@@ -124,12 +136,13 @@ services:
   jackett:
     container_name: jackett
     image: linuxserver/jackett
-    network_mode: host
-    env_file:
-      - default.env
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     volumes:
-      - /opt/appdata/jackett:/config
-      - /media/hdd1/nedlastning:/downloads
+      - ${CONFIG_PATH}/jackett:/config
+      - ${DOWNLOAD_PATH}:/downloads
     restart: unless-stopped
     deploy:
       replicas: 1
@@ -145,11 +158,13 @@ services:
       - '3579:3579'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /opt/appdata/ombi:/config
+      - ${CONFIG_PATH}/ombi:/config
     environment:
       - HOME=/config
-    env_file:
-      - default.env
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     restart: unless-stopped
     deploy:
       replicas: 1
@@ -164,10 +179,10 @@ services:
     ports:
       - '9000:9000'
     environment:
-      - HTTPS_PROXY=your_proxy_domain
+      - HTTPS_PROXY=${PORTAINER_HTTPS_PROXY}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /opt/appdata/portainer:/data
+      - ${CONFIG_PATH}/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart:
       always
@@ -199,5 +214,3 @@ services:
   
 networks:
   proxy:
-    external:
-      name: proxy
