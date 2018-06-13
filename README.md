@@ -35,9 +35,10 @@ Docker setup for Deluge with OpenVPN, Nginx with Organizr, Plex, Sonarr, Radarr,
 9. Run with `docker-compose up -d` the `-d` is optional for running inn the background.
 10. To create a password on the nginx server to have protection if you serve the server on the wide-web run this command.
 
-   `docker exec -it nginx htpasswd -c /config/nginx/.htpasswd <username>`. 
+      `docker exec -it nginx htpasswd -c /config/nginx/.htpasswd <username>`.
    
-   This will create a file with your login credentials and hash the password.
+      This will create a file with your login credentials and hash the password.
+   
 11. You are now done with the most part. The rest is personal preferences and setup. If you have any issues with reverse proxy, you may have to add base path in some applications.
 
 ## .env files guide
