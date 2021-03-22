@@ -3,9 +3,9 @@ services:
   delugevpn:
     container_name: delugevpn
     image: binhex/arch-delugevpn
-    cap_add: 
+    cap_add:
       - NET_ADMIN
-    ports: 
+    ports:
       - '8112:8112'
       - '8118:8118'
       - '58846:58846'
@@ -31,8 +31,8 @@ services:
 
   nginx:
     container_name: nginx
-    image: linuxserver/letsencrypt
-    cap_add: 
+    image: linuxserver/swag
+    cap_add:
       - NET_ADMIN
     ports:
       - '443:443'
@@ -132,7 +132,7 @@ services:
         condition: on-failure
     networks:
       - proxy
-      
+
   jackett:
     container_name: jackett
     image: linuxserver/jackett
@@ -161,7 +161,6 @@ services:
       - ${CONFIG_PATH}/ombi:/config
     environment:
       - HOME=/config
-    environment:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
@@ -192,7 +191,7 @@ services:
         condition: on-failure
     networks:
       - proxy
-      
+
   glances:
     image: docker.io/nicolargo/glances
     container_name: glances
@@ -211,6 +210,6 @@ services:
         condition: on-failure
     networks:
       - proxy
-  
+
 networks:
   proxy:
